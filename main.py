@@ -5,47 +5,41 @@ from src.cache_layer import ReviewCache
 from src.ai_engine import AIEngine
 
 def main():
-    print("🚀 Starting Intelligent PR Assistant...")
+    print("🚀 Initializing Intelligent PR Assistant...")
     
-    # 1. Initialize Components
     git = GitClient()
     analyzer = PRAnalyzer()
     cache = ReviewCache()
     ai = AIEngine()
 
-    # 2. Get the code changes
-    print("🔍 Fetching local git diff...")
+    # 1. Get changes from Git
     diff = git.get_unstaged_changes()
-    
     if not diff:
-        print("✅ No changes detected. Your code looks clean!")
+        print("✅ No unstaged changes found. Try editing a file!")
         return
 
-    # 3. Check Cache first (The 'Senior Engineer' move)
+    # 2. Check Cache
     cached_review = cache.get_cached_review(diff)
     if cached_review:
-        print("📦 Found cached review. Skipping AI call...")
-        print(f"\n--- Cached Review ---\n{cached_review}")
+        print("📦 Found cached review for these changes:")
+        print(cached_review)
         return
 
-    # 4. Perform Static Analysis (AST)
-    print("📊 Performing AST Complexity Analysis...")
+    # 3. Static Analysis
     issues = analyzer.analyze(diff)
     
-    complexity_report = ""
-    if issues:
-        for issue in issues:
-            complexity_report += f"- Function '{issue['function']}' at line {issue['line']}: {issue['issue']} (Score: {issue['score']})\n"
-    else:
-        complexity_report = "Low complexity detected."
-
-    # 5. Get AI Review
-    print("🤖 Requesting AI Review...")
-    review = ai.generate_review(diff, complexity_report)
+    # 4. AI Review
+    review = ai.generate_review(diff, issues)
     
-    # 6. Save to Cache and Print
+    # 5. Store in Cache
     cache.set_cached_review(diff, review)
-    print(f"\n--- Final Review ---\n{review}")
+    
+    print("\n--- 🤖 AI CODE REVIEW ---")
+    print(review)
+    if issues:
+        print("\n--- 📊 COMPLEXITY ALERTS ---")
+        for issue in issues:
+            print(f"⚠️ Function '{issue['function']}' at line {issue['line']}: Score {issue['score']}")
 
 if __name__ == "__main__":
     main()
