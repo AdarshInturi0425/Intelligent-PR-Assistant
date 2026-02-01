@@ -1,36 +1,20 @@
-import subprocess
+import os
 
 class GitClient:
-    """
-    Interfaces with the local git repository to extract code changes.
-    """
     def get_unstaged_changes(self):
-        """
-        Captures work-in-progress changes that haven't been committed yet.
-        """
+        """Read Python files directly from the workspace, avoiding Git diff formatting issues."""
         try:
-            # Runs 'git diff' to see what changed in your files
-            result = subprocess.run(
-                ['git', 'diff'],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            return result.stdout
-        except subprocess.CalledProcessError:
-            return ""
-
-    def get_diff_against_main(self):
-        """
-        Captures changes between current branch and main.
-        """
-        try:
-            result = subprocess.run(
-                ['git', 'diff', 'main'],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            return result.stdout
-        except subprocess.CalledProcessError:
+            python_code = ""
+            # Read all .py files in the current directory
+            for filename in sorted(os.listdir('.')):
+                if filename.endswith('.py') and not filename.startswith('.') and filename not in ['main.py']:
+                    try:
+                        with open(filename, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            if content.strip():
+                                python_code += content + "\n"
+                    except:
+                        pass
+            return python_code
+        except Exception as e:
             return ""
