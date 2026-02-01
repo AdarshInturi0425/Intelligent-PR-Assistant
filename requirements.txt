@@ -1,0 +1,4 @@
+# No external libraries needed for the core logic yet, 
+# but we include these for future AI integration.
+openai
+python-dotenv
